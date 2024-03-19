@@ -1,0 +1,71 @@
+-- very simple 1 sec you get on bike etc game autofarm 600 wins script on key is U to turn back on after turning off with is O to turn off
+-- Store the initial position
+local initialPosition = Vector3.new(13887.96484375, 18.410417556762695, -18562.220703125)
+
+-- Function to teleport the player to a specified position
+local function teleportToPosition(player, position)
+    -- Check if the player exists
+    if player then
+        -- Check if the player's character exists
+        local character = player.Character
+        if character then
+            -- Check if the player's character has a HumanoidRootPart
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                -- Set the player's position to the specified coordinates
+                humanoidRootPart.CFrame = CFrame.new(position)
+                print("Teleported player to position:", position)
+                -- Make the player jump after teleportation
+                character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            else
+                print("HumanoidRootPart not found in player's character")
+            end
+        else
+            print("Character not found for player")
+        end
+    else
+        print("Player not found")
+    end
+end
+
+-- Teleport player to the specified position
+local player = game.Players.LocalPlayer
+teleportToPosition(player, initialPosition)
+
+-- Variable to control automatic teleportation
+local autoTeleportEnabled = true
+
+-- Function to continuously check player's position and teleport them back if they move away
+local function checkPlayerPosition()
+    while autoTeleportEnabled do
+        wait(1) -- Adjust the interval as needed
+        
+        local character = player.Character
+        if character then
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                local currentPosition = humanoidRootPart.Position
+                if (currentPosition - initialPosition).Magnitude > 5 then
+                    -- Teleport the player back to the initial position if they move away
+                    teleportToPosition(player, initialPosition)
+                end
+            end
+        end
+    end
+end
+
+-- Start checking player's position
+spawn(checkPlayerPosition)
+
+-- Function to handle key press to stop automatic teleportation (key: O)
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.O then
+        autoTeleportEnabled = false
+        print("Automatic teleportation stopped")
+    elseif input.KeyCode == Enum.KeyCode.U then
+        autoTeleportEnabled = true
+        print("Automatic teleportation started")
+        -- Start checking player's position again
+        spawn(checkPlayerPosition)
+    end
+end)
